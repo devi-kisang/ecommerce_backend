@@ -1,4 +1,11 @@
 from fastapi import FastAPI,HTTPException
+from pydantic import BaseModel
+
+class ProductSChema(BaseModel):
+    name:str
+    price:int
+    stock:int
+
 
 app = FastAPI()
 
@@ -25,3 +32,23 @@ def search_product(name: str):
         if name.lower() in item["name"].lower():
             result.append(item)
     return result
+
+@app.delete("/remove_product/{product_id}")
+def remove_product(product_id:int):
+    for item in inventory:
+        if item['id']== product_id:
+            inventory.remove(item)
+
+
+@app.post("/products")
+def create_product(new_product: ProductSChema):
+    product_dict= new_product.model_dump()
+    if inventory:
+        new_id=inventory[-1]["id"]+1
+    else:
+        new_id=1
+
+    product_dict["id"]=new_id
+    inventory.append(product_dict)
+
+    return product_dict
